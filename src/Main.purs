@@ -1,6 +1,6 @@
 module Main where
 
-import Prelude (class Functor, Unit, bind, unit, map, show, pure, const, (*), (+), (/), ($))
+import Prelude (class Functor, Unit, bind, unit, map, show, pure, const, (*), (+), (/), ($), (#))
 import Control.Monad.Aff (runAff)
 import Control.Monad.Eff (Eff())
 import Control.Monad.Eff.Exception (throwException)
@@ -13,7 +13,7 @@ import CSS.TextAlign as TextAlign
 import CSS.Size as Size
 import Data.Array ((..), length)
 import Data.Int (toNumber)
-import Halogen (HalogenEffects, ComponentDSL, Natural, ComponentHTML, Component, runUI, component, action, modify)
+import Halogen (HalogenEffects, ComponentDSL, Natural, ComponentHTML, Component, runUI, component, modify)
 import Halogen.Util (appendToBody)
 import Halogen.HTML.Core (className)
 import Halogen.HTML.CSS.Indexed as CSS
@@ -37,8 +37,7 @@ type State =
   }
 
 data Query a
-  = Init a
-  | UserScroll Int a
+  = UserScroll Int a
 
 calculateVisibleIndices :: State -> Int -> State
 calculateVisibleIndices model scrollTop =
@@ -52,38 +51,32 @@ calculateVisibleIndices model scrollTop =
 
 tableView :: State -> ComponentHTML Query
 tableView { rowCount, rowHeight, colWidth, visibleIndices } = do
-  let rows =
-    map
-        (\index -> do
-          let i = toNumber index
-          let key = show (i % (toNumber (length visibleIndices)))
+  let rows = visibleIndices # map (\index -> do
+        let i = toNumber index
+        let key = show (i % (toNumber (length visibleIndices)))
 
-          H.tr
-            [ P.key key
-            , CSS.style do
-                Display.position Display.absolute
-                Geometry.top (Size.px (i * (toNumber rowHeight)))
-                Geometry.width (Size.pct (toNumber 100))
-            ]
-            [ H.td
-                [ CSS.style do Geometry.width (Size.px (toNumber colWidth)) ]
-                [ H.text $ show i
-                ]
-            , H.td
-                [ CSS.style do Geometry.width (Size.px (toNumber colWidth)) ]
-                [ H.text $ show (i * 1.0)
-                ]
-            , H.td
-                [ CSS.style do Geometry.width (Size.px (toNumber colWidth)) ]
-                [ H.text $ show (i * 100.0)
-                ]
-            ]
-          )
-        visibleIndices
+        H.tr
+          [ P.key key
+          , CSS.style do
+              Display.position Display.absolute
+              Geometry.top $ Size.px (i * (toNumber rowHeight))
+              Geometry.width $ Size.pct (toNumber 100)
+          ]
+          [ H.td
+              [ CSS.style do Geometry.width (Size.px (toNumber colWidth)) ]
+              [ H.text $ show i ]
+          , H.td
+              [ CSS.style do Geometry.width (Size.px (toNumber colWidth)) ]
+              [ H.text $ show (i * 1.0) ]
+          , H.td
+              [ CSS.style do Geometry.width (Size.px (toNumber colWidth)) ]
+              [ H.text $ show (i * 100.0) ]
+          ]
+        )
 
   H.table
     [ CSS.style do
-        Geometry.height (Size.px (toNumber (rowCount * rowHeight)))
+        Geometry.height $ Size.px (toNumber (rowCount * rowHeight))
     ]
     [ H.tbody_ rows
     ]
@@ -93,37 +86,28 @@ ui = component render eval
   where
     render :: State -> ComponentHTML Query
     render state =
-      H.div
-        [ P.initializer \_ -> action Init
-        ]
+      H.div_
         [ H.h1
-          [ CSS.style do TextAlign.textAlign TextAlign.center
-          ]
-          [ H.text "Scroll Table!!!!"
-          ]
+          [ CSS.style do TextAlign.textAlign TextAlign.center ]
+          [ H.text "Scroll Table!!!!" ]
         , H.div_
             [ H.div
-                [ P.class_ (className "container")
+                [ P.class_ $ className "container"
                 , CSS.style do
                     Display.position Display.relative
-                    Geometry.height (Size.px (toNumber state.height))
-                    Geometry.width (Size.px (toNumber state.width))
+                    Geometry.height $ Size.px (toNumber state.height)
+                    Geometry.width $ Size.px (toNumber state.width)
                     Overflow.overflowX Overflow.hidden
                     Border.border Border.solid (Size.px 1.0) Color.black
-                , E.onScroll (E.input \x -> do
-                    let top = getScrollTop x.target
-                    pure $ action (UserScroll top))
+                , E.onScroll $ E.input \x -> UserScroll (getScrollTop x.target)
                 ]
-                [ tableView state
-                ]
+                [ tableView state ]
             ]
         ]
 
     eval :: Natural Query (ComponentDSL State Query g)
-    eval (Init next) =
-      pure next
     eval (UserScroll e next) = do
-      modify (\s -> calculateVisibleIndices s e)
+      modify $ \s -> calculateVisibleIndices s e
       pure next
 
 initialState :: State

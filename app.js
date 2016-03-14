@@ -25703,20 +25703,11 @@ var Halogen_HTML_Elements_Indexed = require("Halogen.HTML.Elements.Indexed");
 var CSS_Stylesheet = require("CSS.Stylesheet");
 var Halogen_HTML = require("Halogen.HTML");
 var Halogen_HTML_Elements = require("Halogen.HTML.Elements");
-var Halogen_Query = require("Halogen.Query");
 var Halogen_HTML_Events = require("Halogen.HTML.Events");
 var Control_Monad_Free = require("Control.Monad.Free");
+var Halogen_Query = require("Halogen.Query");
 var Halogen_Component = require("Halogen.Component");
 var Halogen_Driver = require("Halogen.Driver");
-var Init = (function () {
-    function Init(value0) {
-        this.value0 = value0;
-    };
-    Init.create = function (value0) {
-        return new Init(value0);
-    };
-    return Init;
-})();
 var UserScroll = (function () {
     function UserScroll(value0, value1) {
         this.value0 = value0;
@@ -25746,14 +25737,14 @@ var calculateVisibleIndices = function (model) {
         var firstRow = scrollTop / model.rowHeight | 0;
         var visibleRows = (model.height + 1 | 0) / model.rowHeight | 0;
         var lastRow = firstRow + visibleRows | 0;
-        var $11 = {};
-        for (var $12 in model) {
-            if (model.hasOwnProperty($12)) {
-                $11[$12] = model[$12];
+        var $10 = {};
+        for (var $11 in model) {
+            if (model.hasOwnProperty($11)) {
+                $10[$11] = model[$11];
             };
         };
-        $11.visibleIndices = Data_Array[".."](firstRow)(lastRow);
-        return $11;
+        $10.visibleIndices = Data_Array[".."](firstRow)(lastRow);
+        return $10;
     };
 };
 var initialState = calculateVisibleIndices({
@@ -25766,9 +25757,7 @@ var initialState = calculateVisibleIndices({
 })(0);
 var ui = function (dictFunctor) {
     var render = function (state) {
-        return Halogen_HTML_Elements_Indexed.div([ Halogen_HTML_Properties_Indexed.initializer(function (v) {
-            return Halogen_Query.action(Init.create);
-        }) ])([ Halogen_HTML_Elements_Indexed.h1([ Halogen_HTML_CSS_Indexed.style(CSS_TextAlign.textAlign(CSS_TextAlign.center)) ])([ Halogen_HTML.text("Scroll Table!!!!") ]), Halogen_HTML_Elements.div_([ Halogen_HTML_Elements_Indexed.div([ Halogen_HTML_Properties_Indexed.class_(Halogen_HTML_Core.className("container")), Halogen_HTML_CSS_Indexed.style(Prelude.bind(CSS_Stylesheet.bindStyleM)(CSS_Display.position(CSS_Display.relative))(function () {
+        return Halogen_HTML_Elements.div_([ Halogen_HTML_Elements_Indexed.h1([ Halogen_HTML_CSS_Indexed.style(CSS_TextAlign.textAlign(CSS_TextAlign.center)) ])([ Halogen_HTML.text("Scroll Table!!!!") ]), Halogen_HTML_Elements.div_([ Halogen_HTML_Elements_Indexed.div([ Halogen_HTML_Properties_Indexed.class_(Halogen_HTML_Core.className("container")), Halogen_HTML_CSS_Indexed.style(Prelude.bind(CSS_Stylesheet.bindStyleM)(CSS_Display.position(CSS_Display.relative))(function () {
             return Prelude.bind(CSS_Stylesheet.bindStyleM)(CSS_Geometry.height(CSS_Size.px(Data_Int.toNumber(state.height))))(function () {
                 return Prelude.bind(CSS_Stylesheet.bindStyleM)(CSS_Geometry.width(CSS_Size.px(Data_Int.toNumber(state.width))))(function () {
                     return Prelude.bind(CSS_Stylesheet.bindStyleM)(CSS_Overflow.overflowX(CSS_Overflow.hidden))(function () {
@@ -25777,22 +25766,15 @@ var ui = function (dictFunctor) {
                 });
             });
         })), Halogen_HTML_Events_Indexed.onScroll(Halogen_HTML_Events.input(function (x) {
-            var top = $foreign.getScrollTop(x.target);
-            return Prelude.pure(Prelude.applicativeFn)(Halogen_Query.action(UserScroll.create(top)));
+            return UserScroll.create($foreign.getScrollTop(x.target));
         })) ])([ tableView(state) ]) ]) ]);
     };
     var $$eval = function (v) {
-        if (v instanceof Init) {
-            return Prelude.pure(Control_Monad_Free.freeApplicative)(v.value0);
-        };
-        if (v instanceof UserScroll) {
-            return Prelude.bind(Control_Monad_Free.freeBind)(Halogen_Query.modify(function (s) {
-                return calculateVisibleIndices(s)(v.value0);
-            }))(function () {
-                return Prelude.pure(Control_Monad_Free.freeApplicative)(v.value1);
-            });
-        };
-        throw new Error("Failed pattern match at Main line 123, column 5 - line 125, column 5: " + [ v.constructor.name ]);
+        return Prelude.bind(Control_Monad_Free.freeBind)(Halogen_Query.modify(function (s) {
+            return calculateVisibleIndices(s)(v.value0);
+        }))(function () {
+            return Prelude.pure(Control_Monad_Free.freeApplicative)(v.value1);
+        });
     };
     return Halogen_Component.component(render)($$eval);
 };
@@ -25800,7 +25782,6 @@ var main = Control_Monad_Aff.runAff(Control_Monad_Eff_Exception.throwException)(
     return Halogen_Util.appendToBody(Control_Monad_Aff.monadEffAff)(v.node);
 }));
 module.exports = {
-    Init: Init, 
     UserScroll: UserScroll, 
     main: main, 
     initialState: initialState, 

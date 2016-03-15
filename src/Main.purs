@@ -1,6 +1,6 @@
 module Main where
 
-import Prelude (class Functor, Unit, bind, unit, map, show, pure, const, (*), (+), (/), ($), (#))
+import Prelude (class Functor, Unit, bind, unit, show, pure, const, (<#>), (*), (+), (/), ($))
 import Control.Monad.Aff (runAff)
 import Control.Monad.Eff (Eff())
 import Control.Monad.Eff.Exception (throwException)
@@ -50,36 +50,32 @@ calculateVisibleIndices model scrollTop =
       model { visibleIndices = firstRow..lastRow }
 
 tableView :: State -> ComponentHTML Query
-tableView { rowCount, rowHeight, colWidth, visibleIndices } = do
-  let rows = visibleIndices # map (\index -> do
-        let i = toNumber index
-        let key = show (i % (toNumber (length visibleIndices)))
-
-        H.tr
-          [ P.key key
-          , CSS.style do
-              Display.position Display.absolute
-              Geometry.top $ Size.px (i * (toNumber rowHeight))
-              Geometry.width $ Size.pct (toNumber 100)
-          ]
-          [ H.td
-              [ CSS.style do Geometry.width (Size.px (toNumber colWidth)) ]
-              [ H.text $ show i ]
-          , H.td
-              [ CSS.style do Geometry.width (Size.px (toNumber colWidth)) ]
-              [ H.text $ show (i * 1.0) ]
-          , H.td
-              [ CSS.style do Geometry.width (Size.px (toNumber colWidth)) ]
-              [ H.text $ show (i * 100.0) ]
-          ]
-        )
-
+tableView { rowCount, rowHeight, colWidth, visibleIndices } =
   H.table
-    [ CSS.style do
-        Geometry.height $ Size.px (toNumber (rowCount * rowHeight))
-    ]
-    [ H.tbody_ rows
-    ]
+    [ CSS.style do Geometry.height $ Size.px (toNumber (rowCount * rowHeight)) ]
+    [ H.tbody_ $ visibleIndices <#> makeRow ]
+  where
+    makeRow index = do
+      let i = toNumber index
+      let key = show (i % (toNumber (length visibleIndices)))
+
+      H.tr
+        [ P.key key
+        , CSS.style do
+          Display.position Display.absolute
+          Geometry.top $ Size.px (i * (toNumber rowHeight))
+          Geometry.width $ Size.pct (toNumber 100)
+        ]
+        [ H.td
+          [ CSS.style do Geometry.width (Size.px (toNumber colWidth)) ]
+          [ H.text $ show i ]
+        , H.td
+          [ CSS.style do Geometry.width (Size.px (toNumber colWidth)) ]
+          [ H.text $ show (i * 1.0) ]
+        , H.td
+          [ CSS.style do Geometry.width (Size.px (toNumber colWidth)) ]
+          [ H.text $ show (i * 100.0) ]
+        ]
 
 ui :: forall g. (Functor g) => Component State Query g
 ui = component render eval

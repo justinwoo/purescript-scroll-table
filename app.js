@@ -25721,7 +25721,7 @@ var UserScroll = (function () {
     return UserScroll;
 })();
 var tableView = function (v) {
-    var rows = Prelude.map(Prelude.functorArray)(function (index) {
+    var makeRow = function (index) {
         var i = Data_Int.toNumber(index);
         var key = Prelude.show(Prelude.showNumber)($$Math["%"](i)(Data_Int.toNumber(Data_Array.length(v.visibleIndices))));
         return Halogen_HTML_Elements_Indexed.tr([ Halogen_HTML_Properties_Indexed.key(key), Halogen_HTML_CSS_Indexed.style(Prelude.bind(CSS_Stylesheet.bindStyleM)(CSS_Display.position(CSS_Display.absolute))(function () {
@@ -25729,8 +25729,8 @@ var tableView = function (v) {
                 return CSS_Geometry.width(CSS_Size.pct(Data_Int.toNumber(100)));
             });
         })) ])([ Halogen_HTML_Elements_Indexed.td([ Halogen_HTML_CSS_Indexed.style(CSS_Geometry.width(CSS_Size.px(Data_Int.toNumber(v.colWidth)))) ])([ Halogen_HTML.text(Prelude.show(Prelude.showNumber)(i)) ]), Halogen_HTML_Elements_Indexed.td([ Halogen_HTML_CSS_Indexed.style(CSS_Geometry.width(CSS_Size.px(Data_Int.toNumber(v.colWidth)))) ])([ Halogen_HTML.text(Prelude.show(Prelude.showNumber)(i * 1.0)) ]), Halogen_HTML_Elements_Indexed.td([ Halogen_HTML_CSS_Indexed.style(CSS_Geometry.width(CSS_Size.px(Data_Int.toNumber(v.colWidth)))) ])([ Halogen_HTML.text(Prelude.show(Prelude.showNumber)(i * 100.0)) ]) ]);
-    })(v.visibleIndices);
-    return Halogen_HTML_Elements_Indexed.table([ Halogen_HTML_CSS_Indexed.style(CSS_Geometry.height(CSS_Size.px(Data_Int.toNumber(v.rowCount * v.rowHeight | 0)))) ])([ Halogen_HTML_Elements.tbody_(rows) ]);
+    };
+    return Halogen_HTML_Elements_Indexed.table([ Halogen_HTML_CSS_Indexed.style(CSS_Geometry.height(CSS_Size.px(Data_Int.toNumber(v.rowCount * v.rowHeight | 0)))) ])([ Halogen_HTML_Elements.tbody_(Prelude["<#>"](Prelude.functorArray)(v.visibleIndices)(makeRow)) ]);
 };
 var calculateVisibleIndices = function (model) {
     return function (scrollTop) {
